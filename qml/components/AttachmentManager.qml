@@ -481,15 +481,17 @@ Item {
         if (!mime)
             return "document-open";
         if (mime.indexOf("image/") === 0)
-            return "image";
+            return "image-x-generic-symbolic";
         if (mime.indexOf("video/") === 0)
-            return "video";
+            return "video-x-generic-symbolic";
         if (mime.indexOf("audio/") === 0)
-            return "audio";
+            return "audio-x-generic-symbolic";
         if (mime.indexOf("application/pdf") === 0)
-            return "mimetypes/pdf"; // Typical in Lomiri
+            return "application-pdf-symbolic";
         if (mime.indexOf("spreadsheet") !== -1 || mime.indexOf("excel") !== -1 || mime.indexOf("sheet") !== -1)
-            return "mimetypes/spreadsheet";
+            return "x-office-spreadsheet-symbolic";
+        if (mime.indexOf("word") !== -1 || mime.indexOf("document") !== -1)
+            return "x-office-document-symbolic";
         return "document";
     }
 
