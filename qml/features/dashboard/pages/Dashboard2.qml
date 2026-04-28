@@ -25,7 +25,7 @@
 import QtQuick 2.7
 import Lomiri.Components 1.3
 import QtCharts 2.0
-import "../models/Main.js" as Model
+import "../../../../models/Main.js" as Model
 
 Page {
     id: dashboard
@@ -102,7 +102,7 @@ Page {
             anchors.left: parent.left
             anchors.right: parent.right
             //            anchors.top: header.bottom
-            source: "Charts3.qml"
+            source: "../../../Charts3.qml"
         }
 
         Loader {
@@ -110,7 +110,7 @@ Page {
             anchors.left: parent.left
             anchors.right: parent.right
             anchors.top: load3.bottom
-            source: "Charts4.qml"
+            source: "../../../Charts4.qml"
         }
 
         onFlickEnded: {

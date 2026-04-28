@@ -55,17 +55,18 @@ Rectangle {
     ChartView {
         id: chart3
         title: "Projectwise Time Spent"
-        titleColor: theme.name === "Ubuntu.Components.Themes.SuruDark" ? "White" : "#444"
+        titleColor: Theme.name === "Ubuntu.Components.Themes.SuruDark" ? "White" : "#444"
 
         anchors.fill: parent
         legend.alignment: Qt.AlignBottom
         antialiasing: true
 
         backgroundColor: "transparent"
-        legend.labelColor: theme.name === "Ubuntu.Components.Themes.SuruDark" ? "White" : "#444"
+        legend.labelColor: Theme.name === "Ubuntu.Components.Themes.SuruDark" ? "White" : "#444"
         legend.font.pixelSize: units.gu(3)
 
-        // theme: ChartView.ChartThemeHighContrast
+        // No built-in theme so it doesn't override our custom transparent background
+        // theme: Theme.name === "Ubuntu.Components.Themes.SuruDark" ? ChartView.ChartThemeDark : ChartView.ChartThemeLight
 
         BarSeries {
             id: mySeries
@@ -73,10 +74,12 @@ Rectangle {
                 min: 0
                 max: 50
                 tickCount: 5
-                labelsColor: theme.name === "Ubuntu.Components.Themes.SuruDark" ? "White" : "#444"
+                labelsColor: Theme.name === "Ubuntu.Components.Themes.SuruDark" ? "White" : "#444"
+                gridLineColor: Theme.name === "Ubuntu.Components.Themes.SuruDark" ? "#444" : "#ddd"
             }
             axisX: BarCategoryAxis {
-                labelsColor: theme.name === "Ubuntu.Components.Themes.SuruDark" ? "White" : "#444"
+                labelsColor: Theme.name === "Ubuntu.Components.Themes.SuruDark" ? "White" : "#444"
+                gridLineColor: Theme.name === "Ubuntu.Components.Themes.SuruDark" ? "transparent" : "transparent"
             }
         }
 
@@ -85,12 +88,10 @@ Rectangle {
 
             var count = 0;
             var count2 = Object.keys(project_data).length;
-            //  console.log("Count2 is: " + count2);
-            /*                    for (count = 0; count < count2; count++)
-                        {
-                            console.log("Project Timecat: " + project_timecat[count]);
-                    }*/
-            mySeries.append("Time", project_timecat);
+            
+            var barSet = mySeries.append(i18n.dtr("ubtms", "Time"), project_timecat);
+            barSet.color = LomiriColors.blue;
+            
             mySeries.axisX.categories = project;
         }
     }

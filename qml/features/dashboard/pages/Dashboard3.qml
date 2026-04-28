@@ -25,7 +25,7 @@
 import QtQuick 2.7
 import Lomiri.Components 1.3
 import QtCharts 2.0
-import "../models/Main.js" as Model
+import "../../../../models/Main.js" as Model
 
 Page {
     id: dashboard2
@@ -43,13 +43,16 @@ Page {
         ChartView {
             id: chart4
             title: i18n.dtr("ubtms", "Taskwise Time Spent")
+            titleColor: Theme.name === "Ubuntu.Components.Themes.SuruDark" ? "White" : "#444"
             anchors.fill: parent
-            theme: ChartView.ChartThemeHighContrast
+            
+            // No built-in theme so it doesn't override our custom transparent background
+            
             legend.alignment: Qt.AlignBottom
             antialiasing: true
 
             backgroundColor: "transparent"
-            legend.labelColor: "red"
+            legend.labelColor: Theme.name === "Ubuntu.Components.Themes.SuruDark" ? "White" : "#444"
 
             BarSeries {
                 id: mySeries2
@@ -57,6 +60,12 @@ Page {
                     min: 0
                     max: 50
                     tickCount: 5
+                    labelsColor: Theme.name === "Ubuntu.Components.Themes.SuruDark" ? "White" : "#444"
+                    gridLineColor: Theme.name === "Ubuntu.Components.Themes.SuruDark" ? "#444" : "#ddd"
+                }
+                axisX: BarCategoryAxis {
+                    labelsColor: Theme.name === "Ubuntu.Components.Themes.SuruDark" ? "White" : "#444"
+                    gridLineColor: "transparent"
                 }
             }
 
@@ -78,7 +87,8 @@ Page {
                     timecat[count] = quadrant_data[task[count]];
                     // console.log("Dashboard 3 Timecat in task: " + timecat[count]);
                 }
-                mySeries2.append("Time", timecat);
+                var barSet = mySeries2.append(i18n.dtr("ubtms", "Time"), timecat);
+                barSet.color = LomiriColors.orange;
                 mySeries2.axisX.categories = task;
             }
         }
