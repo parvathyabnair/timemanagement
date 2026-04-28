@@ -70,21 +70,56 @@ Item {
 
         RowLayout {
             Layout.fillWidth: true
+            spacing: units.gu(1)
+
+            Icon {
+                name: "attachment"
+                width: units.gu(3)
+                height: units.gu(3)
+                color: "#E65100"
+            }
 
             Label {
                 text: attachmentManager.title
                 font.bold: true
-                Layout.alignment: Qt.AlignVCenter | Qt.AlignLeft
+                font.pixelSize: units.gu(2.5)
+                color: "white"
+                Layout.alignment: Qt.AlignVCenter
             }
 
             Item {
                 Layout.fillWidth: true
-            } // spacer
+            }
 
-            Button {
+            Rectangle {
                 id: uploadBtn
-                text: i18n.dtr("ubtms", "Upload")
-                onClicked: openContentPicker()
+                width: units.gu(14)
+                height: units.gu(5)
+                color: uploadMouseArea.pressed ? "#BF360C" : "#E65100"
+                radius: units.gu(0.5)
+                Layout.alignment: Qt.AlignVCenter
+
+                RowLayout {
+                    anchors.centerIn: parent
+                    spacing: units.gu(1)
+                    Icon {
+                        name: "upload"
+                        width: units.gu(2)
+                        height: units.gu(2)
+                        color: "white"
+                    }
+                    Label {
+                        text: i18n.dtr("ubtms", "Upload")
+                        color: "white"
+                        font.bold: true
+                    }
+                }
+
+                MouseArea {
+                    id: uploadMouseArea
+                    anchors.fill: parent
+                    onClicked: openContentPicker()
+                }
             }
         }
 
@@ -93,25 +128,27 @@ Item {
             Layout.fillWidth: true
             Layout.fillHeight: true
             color: "transparent"
-            border.color: "#00000022"
-            border.width: 1
-            radius: units.gu(0.5)
+            clip: true
 
             ListView {
                 id: listView
                 anchors.fill: parent
-                anchors.margins: units.gu(1)
+                anchors.topMargin: units.gu(1)
                 clip: true
-                spacing: units.gu(0.5)
+                spacing: units.gu(1)
+                
+                Scrollbar {
+                    flickableItem: listView
+                    align: Qt.AlignRight
+                }
 
                 // Roles expected: name, url, mimetype, size, created, account_id, odoo_record_id, _raw
                 delegate: Rectangle {
                     width: listView.width
-                    height: Math.max(units.gu(5), nameLabel.implicitHeight + units.gu(2))
-                    radius: units.gu(0.5)
-                    color: "transparent"
-                    border.color: "#00000022"
-
+                    height: units.gu(9)
+                    radius: units.gu(1)
+                    color: "#1A1A1A"
+                    
                     // Guarded convenience values
                     property string _name: (typeof name !== "undefined" && name) ? name : ((typeof url !== "undefined" && url) ? url : "Unnamed")
                     property string _url: (typeof url !== "undefined" && url) ? url : ""
@@ -135,34 +172,41 @@ Item {
                                 odoo_record_id: _odooId,
                                 _raw: rawData
                             };
-                            // emit for custom handlers
                             attachmentManager.itemClicked(rec);
-                            // default behavior: download and open
                             attachmentManager._downloadAndOpen(rec);
                         }
                     }
 
                     RowLayout {
                         anchors.fill: parent
-                        anchors.margins: units.gu(1)
-                        spacing: units.gu(1)
+                        anchors.margins: units.gu(1.5)
+                        spacing: units.gu(2)
 
                         Rectangle {
-                            width: units.gu(3)
-                            height: units.gu(3)
+                            width: units.gu(5)
+                            height: units.gu(5)
                             radius: units.gu(0.5)
-                            color: _chipColor(_mimetype)
+                            color: _iconBoxColor(_mimetype)
                             Layout.alignment: Qt.AlignVCenter
+                            
+                            Icon {
+                                anchors.centerIn: parent
+                                width: units.gu(3)
+                                height: units.gu(3)
+                                color: "white"
+                                name: _iconName(_mimetype)
+                            }
                         }
 
                         ColumnLayout {
                             Layout.fillWidth: true
-                            spacing: units.gu(0.3)
+                            spacing: units.gu(0.5)
 
                             Label {
                                 id: nameLabel
                                 text: _name
-                                  color: '#1d1c1c'
+                                color: "white"
+                                font.bold: true
                                 elide: Label.ElideRight
                                 maximumLineCount: 1
                                 Layout.fillWidth: true
@@ -170,12 +214,20 @@ Item {
 
                             Label {
                                 text: _metaLine(_mimetype, _size, _created)
-                                color: "#808080"
+                                color: "#888888"
                                 font.pixelSize: units.gu(1.5)
                                 elide: Label.ElideRight
                                 maximumLineCount: 1
                                 Layout.fillWidth: true
                             }
+                        }
+                        
+                        Icon {
+                            name: "more"
+                            width: units.gu(3)
+                            height: units.gu(3)
+                            color: "#888888"
+                            Layout.alignment: Qt.AlignVCenter
                         }
                     }
                 }
@@ -413,20 +465,32 @@ Item {
         return bytes.toFixed(1) + " " + units[u];
     }
 
-    function _chipColor(mime) {
+    function _iconBoxColor(mime) {
         if (!mime)
             return "#607D8B";
         if (mime.indexOf("image/") === 0)
-            return "#4CAF50";
-        if (mime.indexOf("video/") === 0)
-            return "#9C27B0";
-        if (mime.indexOf("audio/") === 0)
-            return "#03A9F4";
-        if (mime.indexOf("text/") === 0)
-            return "#FFC107";
+            return "#0D47A1"; // Deep Blue
         if (mime.indexOf("application/pdf") === 0)
-            return "#F44336";
+            return "#B71C1C"; // Deep Red
+        if (mime.indexOf("spreadsheet") !== -1 || mime.indexOf("excel") !== -1 || mime.indexOf("sheet") !== -1)
+            return "#1B5E20"; // Deep Green
         return "#607D8B";
+    }
+
+    function _iconName(mime) {
+        if (!mime)
+            return "document-open";
+        if (mime.indexOf("image/") === 0)
+            return "image";
+        if (mime.indexOf("video/") === 0)
+            return "video";
+        if (mime.indexOf("audio/") === 0)
+            return "audio";
+        if (mime.indexOf("application/pdf") === 0)
+            return "mimetypes/pdf"; // Typical in Lomiri
+        if (mime.indexOf("spreadsheet") !== -1 || mime.indexOf("excel") !== -1 || mime.indexOf("sheet") !== -1)
+            return "mimetypes/spreadsheet";
+        return "document";
     }
 
     //  FileSmart(record) – avoids Gallery duplicates for images
