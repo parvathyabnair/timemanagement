@@ -156,8 +156,8 @@ Item {
                     width: listView.width
                     height: units.gu(10)
                     radius: units.gu(1.5)
-                    color: theme.palette.normal.base
-                    border.color: theme.palette.normal.outline
+                    color: theme.name === "Ubuntu.Components.Themes.SuruDark" ? theme.palette.normal.base : "#F8FAFC"
+                    border.color: theme.name === "Ubuntu.Components.Themes.SuruDark" ? theme.palette.normal.outline : "#FFE4E6"
                     border.width: units.dp(1)
                     
                     // Guarded convenience values
