@@ -70,21 +70,33 @@ Item {
 
         RowLayout {
             Layout.fillWidth: true
+            Layout.leftMargin: units.gu(1)
+            Layout.rightMargin: units.gu(1)
             spacing: units.gu(1)
-
-            Icon {
-                name: "attachment"
-                width: units.gu(3)
-                height: units.gu(3)
-                color: "#E65100"
-            }
 
             Label {
                 text: attachmentManager.title
                 font.bold: true
-                font.pixelSize: units.gu(2.5)
-                color: "white"
+                font.pixelSize: units.gu(3)
+                color: theme.palette.normal.baseText
                 Layout.alignment: Qt.AlignVCenter
+            }
+
+            Rectangle {
+                width: units.gu(3.5)
+                height: units.gu(3.5)
+                radius: width / 2
+                color: "#E8EAF6"
+                Layout.alignment: Qt.AlignVCenter
+                visible: listView.count > 0
+
+                Label {
+                    anchors.centerIn: parent
+                    text: listView.count
+                    font.pixelSize: units.gu(1.8)
+                    font.bold: true
+                    color: "#3F51B5"
+                }
             }
 
             Item {
@@ -93,25 +105,20 @@ Item {
 
             Rectangle {
                 id: uploadBtn
-                width: units.gu(14)
+                width: units.gu(5)
                 height: units.gu(5)
-                color: uploadMouseArea.pressed ? "#BF360C" : "#E65100"
-                radius: units.gu(0.5)
+                color: uploadMouseArea.pressed ? "#f97316" : "#f97316"
+                radius: units.gu(1)
                 Layout.alignment: Qt.AlignVCenter
 
                 RowLayout {
                     anchors.centerIn: parent
                     spacing: units.gu(1)
                     Icon {
-                        name: "upload"
-                        width: units.gu(2)
-                        height: units.gu(2)
+                        source: "../images/upload-svgrepo-com.svg"
+                        width: units.gu(3)
+                        height: units.gu(3)
                         color: "white"
-                    }
-                    Label {
-                        text: i18n.dtr("ubtms", "Upload")
-                        color: "white"
-                        font.bold: true
                     }
                 }
 
@@ -133,9 +140,11 @@ Item {
             ListView {
                 id: listView
                 anchors.fill: parent
+                anchors.leftMargin: units.gu(1)
+                anchors.rightMargin: units.gu(1)
                 anchors.topMargin: units.gu(1)
                 clip: true
-                spacing: units.gu(1)
+                spacing: units.gu(1.5)
                 
                 Scrollbar {
                     flickableItem: listView
@@ -145,9 +154,11 @@ Item {
                 // Roles expected: name, url, mimetype, size, created, account_id, odoo_record_id, _raw
                 delegate: Rectangle {
                     width: listView.width
-                    height: units.gu(9)
-                    radius: units.gu(1)
-                    color: "#1A1A1A"
+                    height: units.gu(10)
+                    radius: units.gu(1.5)
+                    color: theme.palette.normal.base
+                    border.color: theme.palette.normal.outline
+                    border.width: units.dp(1)
                     
                     // Guarded convenience values
                     property string _name: (typeof name !== "undefined" && name) ? name : ((typeof url !== "undefined" && url) ? url : "Unnamed")
@@ -183,29 +194,29 @@ Item {
                         spacing: units.gu(2)
 
                         Rectangle {
-                            width: units.gu(5)
-                            height: units.gu(5)
-                            radius: units.gu(0.5)
-                            color: _iconBoxColor(_mimetype)
+                            width: units.gu(6)
+                            height: units.gu(6)
+                            radius: units.gu(1)
+                            color: _iconLightBgColor(_mimetype)
                             Layout.alignment: Qt.AlignVCenter
                             
                             Icon {
                                 anchors.centerIn: parent
                                 width: units.gu(3)
                                 height: units.gu(3)
-                                color: "white"
+                                color: _iconBoxColor(_mimetype)
                                 name: _iconName(_mimetype)
                             }
                         }
 
                         ColumnLayout {
                             Layout.fillWidth: true
-                            spacing: units.gu(0.5)
+                            spacing: 0
 
                             Label {
                                 id: nameLabel
                                 text: _name
-                                color: "white"
+                                color: theme.palette.normal.baseText
                                 font.bold: true
                                 elide: Label.ElideRight
                                 maximumLineCount: 1
@@ -213,9 +224,9 @@ Item {
                             }
 
                             Label {
-                                text: _metaLine(_mimetype, _size, _created)
+                                text: _metaLineLabel(_mimetype, _size)
                                 color: "#888888"
-                                font.pixelSize: units.gu(1.5)
+                                font.pixelSize: units.gu(1.8)
                                 elide: Label.ElideRight
                                 maximumLineCount: 1
                                 Layout.fillWidth: true
@@ -236,7 +247,7 @@ Item {
             // Busy overlay (optional)
             Rectangle {
                 anchors.fill: parent
-                color: "#00000022"
+               color: '#00d3d3e3'
                 visible: attachmentManager._busy
                 BusyIndicator {
                     anchors.centerIn: parent
@@ -450,6 +461,17 @@ Item {
         return parts.join(" • ");
     }
 
+    function _metaLineLabel(mime, sz) {
+        var label = "Document";
+        if (mime.indexOf("image/") === 0) label = "Image";
+        else if (mime.indexOf("application/pdf") === 0) label = "PDF Document";
+        else if (mime.indexOf("audio/") === 0) label = "Audio file";
+        else if (mime.indexOf("video/") === 0) label = "Video file";
+        else if (mime.indexOf("spreadsheet") !== -1 || mime.indexOf("excel") !== -1 || mime.indexOf("sheet") !== -1) label = "Spreadsheet";
+
+        return label;
+    }
+
     function _fmtSize(bytes) {
         if (typeof bytes !== "number")
             return bytes;
@@ -466,15 +488,25 @@ Item {
     }
 
     function _iconBoxColor(mime) {
-        if (!mime)
-            return "#607D8B";
-        if (mime.indexOf("image/") === 0)
-            return "#0D47A1"; // Deep Blue
-        if (mime.indexOf("application/pdf") === 0)
-            return "#B71C1C"; // Deep Red
-        if (mime.indexOf("spreadsheet") !== -1 || mime.indexOf("excel") !== -1 || mime.indexOf("sheet") !== -1)
-            return "#1B5E20"; // Deep Green
+        if (!mime) return "#607D8B";
+        if (mime.indexOf("image/") === 0) return "#009688"; // Teal
+        if (mime.indexOf("application/pdf") === 0) return "#D32F2F"; // Red
+        if (mime.indexOf("word") !== -1 || mime.indexOf("opendocument.text") === 0 || mime.indexOf("document") !== -1) return "#1976D2"; // Blue
+        if (mime.indexOf("audio/") === 0) return "#7B1FA2"; // Purple
+        if (mime.indexOf("video/") === 0) return "#388E3C"; // Green
+        if (mime.indexOf("spreadsheet") !== -1 || mime.indexOf("excel") !== -1 || mime.indexOf("sheet") !== -1) return "#F57C00"; // Orange
         return "#607D8B";
+    }
+
+    function _iconLightBgColor(mime) {
+        if (!mime) return "#F5F5F5";
+        if (mime.indexOf("image/") === 0) return "#E0F2F1";
+        if (mime.indexOf("application/pdf") === 0) return "#FFEBEE";
+        if (mime.indexOf("word") !== -1 || mime.indexOf("opendocument.text") === 0 || mime.indexOf("document") !== -1) return "#E3F2FD";
+        if (mime.indexOf("audio/") === 0) return "#F3E5F5";
+        if (mime.indexOf("video/") === 0) return "#E8F5E9";
+        if (mime.indexOf("spreadsheet") !== -1 || mime.indexOf("excel") !== -1 || mime.indexOf("sheet") !== -1) return "#FFF3E0";
+        return "#F5F5F5";
     }
 
     function _iconName(mime) {

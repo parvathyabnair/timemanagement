@@ -301,6 +301,37 @@ def attachment_ondemand_download(settings_db,account_id, remote_record_id):
     )
     return client.ondemanddownload(remote_record_id,selected["username"],selected["api_key"],False)
 
+def attachment_delete(settings_db, account_id, remote_record_id):
+    """
+    Delete an attachment from Odoo and sync local database.
+    """
+    log.debug(f"[SYNC] Deleting attachment {remote_record_id} for account {account_id}")
+    accounts = get_all_accounts(settings_db)
+    selected = next((acc for acc in accounts if acc["id"] == account_id), None)
+    if not selected:
+        log.error(f"[ERROR] Account {account_id} not found for deletion")
+        return False
+    
+    client = OdooClient(
+        selected["link"],
+        selected["database"],
+        selected["username"],
+        selected["api_key"],
+    )
+    
+    try:
+        # Call unlink on the attachment
+        res = client.call('ir.attachment', 'unlink', [[remote_record_id]])
+        if res:
+            log.info(f"[INFO] Attachment {remote_record_id} deleted successfully from Odoo")
+            # Sync to update local DB
+            sync_ondemand_tables_from_odoo(client, account_id, settings_db, account_name=selected.get("name", ""))
+            return True
+    except Exception as e:
+        log.error(f"[ERROR] Failed to delete attachment {remote_record_id}: {e}")
+    
+    return False
+
 def attachment_upload(settings_db,account_id, filepath,res_type,res_id):
     send("ondemand_upload_message","Initiating upload")
     log.debug(f"[SYNC] Starting attachment_upload  to {account_id} : {filepath} , {res_type} ,{res_id}")
